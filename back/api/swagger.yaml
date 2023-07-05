@@ -1,0 +1,20 @@
+swagger: "2.0"
+info:
+  title: PetProject
+  description: PetProject
+  version: 1.0.0
+host:
+schemes:
+  - https
+  - http
+paths:
+  /users/me:
+    get:
+      responses:
+      security:
+        - JWT: []
+securityDefinitions:
+  JWT:
+    type: apiKey
+    in: header
+    name: access_token
