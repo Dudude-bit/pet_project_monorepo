@@ -10,25 +10,17 @@ type httpResponse struct {
 	Error error       `json:"error"`
 }
 
-func sendResponse(w http.ResponseWriter, statusCode int, body interface{}) error {
-	resp := httpResponse{
-		Data: body,
-	}
-
-	w.WriteHeader(statusCode)
-
-	err := json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		return err
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	return nil
+func sendSuccessResponse(w http.ResponseWriter, statusCode int, body interface{}) error {
+	return sendResponse(w, statusCode, body, nil)
 }
 
 func sendErrorResponse(w http.ResponseWriter, statusCode int, err error) error {
+	return sendResponse(w, statusCode, nil, err)
+}
+
+func sendResponse(w http.ResponseWriter, statusCode int, body interface{}, err error) error {
 	resp := httpResponse{
+		Data:  body,
 		Error: err,
 	}
 

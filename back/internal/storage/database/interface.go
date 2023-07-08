@@ -1,4 +1,4 @@
-package storage
+package database
 
 import "context"
 
@@ -7,18 +7,18 @@ type UserStorageInterface interface {
 	GetUser(ctx context.Context, dto *GetUserDTO) (*GetUserReturn, error)
 }
 
-type VideoStorage interface {
+type VideoStorageInterface interface {
 	CreateVideo(ctx context.Context, dto *CreateVideoDTO) (*CreateVideoReturn, error)
 	GetVideo(ctx context.Context, dto *GetVideoDTO) (*GetVideoReturn, error)
 }
 
-type DonationStorage interface {
+type DonationStorageInterface interface {
 	CreateDonation(ctx context.Context, dto *CreateDonationDTO) (*CreateDonationReturn, error)
 	UpdateDonationStatus(ctx context.Context, dto *UpdateDonationStatusDTO) (*UpdateDonationStatusReturn, error)
 }
 
-type DatabaseInterface interface {
+type DBInterface interface {
 	UserStorageInterface
-	VideoStorage
-	DonationStorage
+	VideoStorageInterface
+	DonationStorageInterface
 }

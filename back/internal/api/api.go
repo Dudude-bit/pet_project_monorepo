@@ -4,22 +4,68 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
 
-const (
-	JWTScopes = "JWT.Scopes"
-)
+// Email Email of user
+type Email = string
+
+// Error Error that appeared while processing request
+type Error = string
+
+// Password Password of user
+type Password = string
+
+// User User schema
+type User struct {
+	// Email Email of user
+	Email *Email `json:"email,omitempty"`
+
+	// Username Username of user
+	Username *Username `json:"username,omitempty"`
+}
+
+// Username Username of user
+type Username = string
+
+// RegisterUser defines model for RegisterUser.
+type RegisterUser struct {
+	// Email Email of user
+	Email Email `json:"email"`
+
+	// Password Password of user
+	Password Password `json:"password"`
+
+	// Username Username of user
+	Username Username `json:"username"`
+}
+
+// RegisterUserJSONBody defines parameters for RegisterUser.
+type RegisterUserJSONBody struct {
+	// Email Email of user
+	Email Email `json:"email"`
+
+	// Password Password of user
+	Password Password `json:"password"`
+
+	// Username Username of user
+	Username Username `json:"username"`
+}
+
+// RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
+type RegisterUserJSONRequestBody RegisterUserJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-
+	// Information about current user
 	// (GET /users/me)
 	GetUsersMe(w http.ResponseWriter, r *http.Request)
+	// Register user
+	// (POST /users/register)
+	RegisterUser(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -35,10 +81,23 @@ type MiddlewareFunc func(http.Handler) http.Handler
 func (siw *ServerInterfaceWrapper) GetUsersMe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	ctx = context.WithValue(ctx, JWTScopes, []string{})
-
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetUsersMe(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// RegisterUser operation middleware
+func (siw *ServerInterfaceWrapper) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RegisterUser(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -163,6 +222,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/users/register", wrapper.RegisterUser)
 	})
 
 	return r

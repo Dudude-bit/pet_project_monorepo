@@ -1,20 +1,82 @@
-swagger: "2.0"
+openapi: "3.1"
 info:
   title: PetProject
   description: PetProject
   version: 1.0.0
-host:
-schemes:
-  - https
-  - http
 paths:
   /users/me:
     get:
+      summary: "Information about current user"
+      description: "Get information about current user that made request"
       responses:
-      security:
-        - JWT: []
-securityDefinitions:
-  JWT:
-    type: apiKey
-    in: header
-    name: access_token
+        200:
+          description: "Success response"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+                  error:
+                    $ref: '#/components/schemas/Error'
+  /users/register:
+    post:
+      summary: "Register user"
+      description: "Register user with given values"
+      operationId: "registerUser"
+      responses:
+        200:
+          description: "Success response"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+                  error:
+                    $ref: '#/components/schemas/Error'
+
+      requestBody:
+        $ref: '#/components/requestBodies/RegisterUser'
+components:
+  schemas:
+    User:
+      description: "User schema"
+      type: object
+      properties:
+        username:
+           $ref: '#/components/schemas/Username'
+        email:
+          $ref: '#/components/schemas/Email'
+    Username:
+      description: "Username of user"
+      type: string
+    Password:
+      description: "Password of user"
+      type: string
+    Email:
+      description: "Email of user"
+      type: string
+    Error:
+      description: "Error that appeared while processing request"
+      type: string
+  requestBodies:
+    RegisterUser:
+      description: "Body to register user"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                $ref: '#/components/schemas/Username'
+              email:
+                $ref: '#/components/schemas/Email'
+              password:
+                $ref: '#/components/schemas/Password'
+            required:
+              - username
+              - email
+              - password
