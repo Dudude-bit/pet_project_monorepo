@@ -38,11 +38,37 @@ func NewStorage(ctx context.Context, params *Config) (*Storage, error) {
 	return &Storage{conn: conn}, nil
 }
 
+func (s *Storage) Close(ctx context.Context) error {
+	return s.conn.Close()
+}
+
 func (s *Storage) CreateUser(ctx context.Context, dto *database.CreateUserDTO) (*database.CreateUserReturn, error) {
-	return nil, nil
+	res, insertErr := userCreate(ctx, s.conn, dto.Username, dto.Password, dto.Email)
+	if insertErr != nil {
+		return nil, insertErr
+	}
+
+	return &database.CreateUserReturn{
+		Username: res.username,
+		Email:    res.email,
+	}, nil
 }
 
 func (s *Storage) GetUser(ctx context.Context, dto *database.GetUserDTO) (*database.GetUserReturn, error) {
-	//TODO implement me
-	panic("implement me")
+
+	edgedbUUID := edgedbLib.UUID{}
+	unmarshalErr := edgedbUUID.UnmarshalText([]byte(dto.Id))
+	if unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+
+	res, selectErr := userGet(ctx, s.conn, edgedbUUID)
+	if selectErr != nil {
+		return nil, selectErr
+	}
+
+	return &database.GetUserReturn{
+		Username: res.username,
+		Email:    res.email,
+	}, nil
 }

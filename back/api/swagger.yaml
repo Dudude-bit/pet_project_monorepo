@@ -1,4 +1,4 @@
-openapi: "3.1"
+openapi: "3.0.1"
 info:
   title: PetProject
   description: PetProject
@@ -53,12 +53,18 @@ components:
     Username:
       description: "Username of user"
       type: string
+      x-oapi-codegen-extra-tags:
+        validate: "required"
     Password:
       description: "Password of user"
       type: string
+      x-oapi-codegen-extra-tags:
+        validate: "required"
     Email:
       description: "Email of user"
       type: string
+      x-oapi-codegen-extra-tags:
+        validate: "required,email"
     Error:
       description: "Error that appeared while processing request"
       type: string
@@ -76,7 +82,13 @@ components:
                 $ref: '#/components/schemas/Email'
               password:
                 $ref: '#/components/schemas/Password'
+              repeat_password:
+                description: "Repeat password"
+                type: "string"
+                x-oapi-codegen-tags:
+                  validate: "eqfield=Password"
             required:
               - username
               - email
               - password
+              - repeat_password

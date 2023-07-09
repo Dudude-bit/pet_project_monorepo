@@ -22,10 +22,10 @@ type Password = string
 // User User schema
 type User struct {
 	// Email Email of user
-	Email *Email `json:"email,omitempty"`
+	Email *Email `json:"email,omitempty" validate:"required,email"`
 
 	// Username Username of user
-	Username *Username `json:"username,omitempty"`
+	Username *Username `json:"username,omitempty" validate:"required"`
 }
 
 // Username Username of user
@@ -34,25 +34,31 @@ type Username = string
 // RegisterUser defines model for RegisterUser.
 type RegisterUser struct {
 	// Email Email of user
-	Email Email `json:"email"`
+	Email Email `json:"email" validate:"required,email"`
 
 	// Password Password of user
-	Password Password `json:"password"`
+	Password Password `json:"password" validate:"required"`
+
+	// RepeatPassword Repeat password
+	RepeatPassword string `json:"repeat_password"`
 
 	// Username Username of user
-	Username Username `json:"username"`
+	Username Username `json:"username" validate:"required"`
 }
 
 // RegisterUserJSONBody defines parameters for RegisterUser.
 type RegisterUserJSONBody struct {
 	// Email Email of user
-	Email Email `json:"email"`
+	Email Email `json:"email" validate:"required,email"`
 
 	// Password Password of user
-	Password Password `json:"password"`
+	Password Password `json:"password" validate:"required"`
+
+	// RepeatPassword Repeat password
+	RepeatPassword string `json:"repeat_password"`
 
 	// Username Username of user
-	Username Username `json:"username"`
+	Username Username `json:"username" validate:"required"`
 }
 
 // RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.

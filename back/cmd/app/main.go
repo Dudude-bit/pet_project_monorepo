@@ -8,7 +8,7 @@ import (
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/api"
 	services "github.com/Dudude-bit/pet_project_monorepo/back/internal/services/user"
 	storage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/edgedb"
-	utils "github.com/Dudude-bit/pet_project_monorepo/back/internal/utils"
+	"github.com/Dudude-bit/pet_project_monorepo/back/internal/utils"
 )
 
 func main() {

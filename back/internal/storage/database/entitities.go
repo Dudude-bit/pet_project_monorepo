@@ -2,10 +2,12 @@ package database
 
 type CreateUserDTO struct {
 	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type GetUserDTO struct {
+	Id string `json:"id"`
 }
 
 type CreateVideoDTO struct {
@@ -25,9 +27,13 @@ type UpdateDonationStatusDTO struct {
 }
 
 type CreateUserReturn struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 type GetUserReturn struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 type CreateVideoReturn struct {

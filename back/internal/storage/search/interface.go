@@ -1,4 +1,4 @@
 package search
 
-type FindInterface interface {
+type StorageInterface interface {
 }

@@ -1,9 +1,8 @@
-package api
+package utils
 
 import (
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	storage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/edgedb"
@@ -29,8 +28,4 @@ func LoadConfig() (*Config, error) {
 	}
 
 	return cfg, nil
-}
-
-func ConfigureLogger() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
 }

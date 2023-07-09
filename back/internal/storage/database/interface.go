@@ -17,8 +17,7 @@ type DonationStorageInterface interface {
 	UpdateDonationStatus(ctx context.Context, dto *UpdateDonationStatusDTO) (*UpdateDonationStatusReturn, error)
 }
 
-type DBInterface interface {
-	UserStorageInterface
-	VideoStorageInterface
-	DonationStorageInterface
+type StorageInterface interface {
+	Pint(ctx context.Context) error
+	Close(ctx context.Context) error
 }
