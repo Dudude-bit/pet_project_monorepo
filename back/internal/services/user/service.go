@@ -12,7 +12,7 @@ type Service struct {
 	queue   queue.UserStorageInterface
 }
 
-func NewUserService(storage database.UserStorageInterface) *Service {
+func NewService(storage database.UserStorageInterface) *Service {
 	return &Service{storage: storage}
 }
 
