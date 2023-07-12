@@ -1,1 +1,6 @@
-**/.idea/
+back/.idea
+app/.idea
+front/.idea
+back/.env
+back/cmd/app/config.yaml
+back/cmd/app/tls.pem

@@ -18,5 +18,6 @@ module default {
 		    constraint exclusive
 		};
 		required property password: str;
+		index on (.username);
 	}
 }

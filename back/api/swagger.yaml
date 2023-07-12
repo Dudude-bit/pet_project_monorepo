@@ -8,6 +8,10 @@ paths:
     get:
       summary: "Information about current user"
       description: "Get information about current user that made request"
+      operationId: "userMe"
+      security:
+        - JWTAuth: []
+
       responses:
         200:
           description: "Success response"
@@ -37,9 +41,28 @@ paths:
                     $ref: '#/components/schemas/User'
                   error:
                     $ref: '#/components/schemas/Error'
-
       requestBody:
         $ref: '#/components/requestBodies/RegisterUser'
+  /users/login:
+    post:
+      summary: "Login user"
+      description: "Make user login"
+      operationId: "loginUser"
+      responses:
+        200:
+          description: "Success response"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Authorization'
+                  error:
+                    $ref: '#/components/schemas/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/LoginUser'
+
 components:
   schemas:
     User:
@@ -50,6 +73,9 @@ components:
            $ref: '#/components/schemas/Username'
         email:
           $ref: '#/components/schemas/Email'
+      required:
+        - username
+        - email
     Username:
       description: "Username of user"
       type: string
@@ -68,6 +94,23 @@ components:
     Error:
       description: "Error that appeared while processing request"
       type: string
+    AccessToken:
+      description: "Access token"
+      type: string
+    Authorization:
+      description: "Authorization info"
+      type: object
+      properties:
+        access_token:
+          $ref: '#/components/schemas/AccessToken'
+      required:
+        - access_token
+  securitySchemes:
+    JWTAuth:
+      type: apiKey
+      in: header
+      scheme: bearer
+      name: Authorization
   requestBodies:
     RegisterUser:
       description: "Body to register user"
@@ -85,10 +128,24 @@ components:
               repeat_password:
                 description: "Repeat password"
                 type: "string"
-                x-oapi-codegen-tags:
-                  validate: "eqfield=Password"
+                x-oapi-codegen-extra-tags:
+                  validate: "required,eqfield=Password"
             required:
               - username
               - email
               - password
               - repeat_password
+    LoginUser:
+      description: "Login user"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                $ref: '#/components/schemas/Username'
+              password:
+                $ref: '#/components/schemas/Password'
+            required:
+              - username
+              - password

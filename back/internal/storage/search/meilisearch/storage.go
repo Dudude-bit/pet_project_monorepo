@@ -7,9 +7,9 @@ import (
 )
 
 type Config struct {
-	DSN       string `mapstructure:"SEARCH_DSN"`
-	MasterKey string `mapstructure:"SEARCH_MASTER_KEY"`
-	Timeout   int    `mapstructure:"SEARCH_TIMEOUT"`
+	DSN       string `mapstructure:"dns"`
+	MasterKey string `mapstructure:"master_key"`
+	Timeout   int    `mapstructure:"timeout"`
 }
 
 type Storage struct {
@@ -24,7 +24,6 @@ func NewStorage(ctx context.Context, params *Config) (*Storage, error) {
 			Timeout: 0,
 		},
 	)
-
 	return &Storage{conn: conn}, nil
 }
 

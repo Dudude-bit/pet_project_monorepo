@@ -3,6 +3,7 @@ with user := (insert User {
     password := <str>$password,
     email := <str>$email
 })
-    select User {
-        username, email
-    } filter .id = user.id;
+  select user {
+    username,
+    email
+  }

@@ -7,7 +7,7 @@ import (
 
 type httpResponse struct {
 	Data  interface{} `json:"data"`
-	Error error       `json:"error"`
+	Error *string     `json:"error"`
 }
 
 func sendSuccessResponse(w http.ResponseWriter, statusCode int, body interface{}) error {
@@ -20,8 +20,12 @@ func sendErrorResponse(w http.ResponseWriter, statusCode int, err error) error {
 
 func sendResponse(w http.ResponseWriter, statusCode int, body interface{}, err error) error {
 	resp := httpResponse{
-		Data:  body,
-		Error: err,
+		Data: body,
+	}
+
+	if err != nil {
+		errString := err.Error()
+		resp.Error = &errString
 	}
 
 	w.WriteHeader(statusCode)

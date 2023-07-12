@@ -6,6 +6,6 @@ type UserStorageInterface interface {
 }
 
 type StorageInterface interface {
-	Pint(ctx context.Context) error
+	Ping(ctx context.Context) error
 	Close(ctx context.Context) error
 }

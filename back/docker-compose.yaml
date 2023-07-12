@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    env_file: "./.env"
+  queue:
+    image: "rabbitmq"
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin"
+    volumes:
+      - "queue_data:/var/lib/rabbitmq/mnesia/"
+  search:
+    image: "getmeili/meilisearch"
+    environment:
+      MASTER_KEY: "admin"
+    volumes:
+      - "meili_data:/meili_data"
+  database:
+    image: "edgedb/edgedb"
+    environment:
+      EDGEDB_SERVER_SECURITY: "insecure_dev_mode"
+    volumes:
+      - "edgedb_data:/var/lib/edgedb/data"
+volumes:
+  queue_data:
+  meili_data:
+  edgedb_data:

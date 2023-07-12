@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	DSN string `mapstructure:"QUEUE_DSN"`
+	DSN string `yaml:"dsn"`
 }
 
 type Storage struct {

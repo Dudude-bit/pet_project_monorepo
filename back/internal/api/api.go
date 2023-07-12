@@ -4,11 +4,25 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
+
+const (
+	JWTAuthScopes = "JWTAuth.Scopes"
+)
+
+// AccessToken Access token
+type AccessToken = string
+
+// Authorization Authorization info
+type Authorization struct {
+	// AccessToken Access token
+	AccessToken AccessToken `json:"access_token"`
+}
 
 // Email Email of user
 type Email = string
@@ -22,14 +36,23 @@ type Password = string
 // User User schema
 type User struct {
 	// Email Email of user
-	Email *Email `json:"email,omitempty" validate:"required,email"`
+	Email Email `json:"email" validate:"required,email"`
 
 	// Username Username of user
-	Username *Username `json:"username,omitempty" validate:"required"`
+	Username Username `json:"username" validate:"required"`
 }
 
 // Username Username of user
 type Username = string
+
+// LoginUser defines model for LoginUser.
+type LoginUser struct {
+	// Password Password of user
+	Password Password `json:"password" validate:"required"`
+
+	// Username Username of user
+	Username Username `json:"username" validate:"required"`
+}
 
 // RegisterUser defines model for RegisterUser.
 type RegisterUser struct {
@@ -40,7 +63,16 @@ type RegisterUser struct {
 	Password Password `json:"password" validate:"required"`
 
 	// RepeatPassword Repeat password
-	RepeatPassword string `json:"repeat_password"`
+	RepeatPassword string `json:"repeat_password" validate:"required,eqfield=Password"`
+
+	// Username Username of user
+	Username Username `json:"username" validate:"required"`
+}
+
+// LoginUserJSONBody defines parameters for LoginUser.
+type LoginUserJSONBody struct {
+	// Password Password of user
+	Password Password `json:"password" validate:"required"`
 
 	// Username Username of user
 	Username Username `json:"username" validate:"required"`
@@ -55,20 +87,26 @@ type RegisterUserJSONBody struct {
 	Password Password `json:"password" validate:"required"`
 
 	// RepeatPassword Repeat password
-	RepeatPassword string `json:"repeat_password"`
+	RepeatPassword string `json:"repeat_password" validate:"required,eqfield=Password"`
 
 	// Username Username of user
 	Username Username `json:"username" validate:"required"`
 }
+
+// LoginUserJSONRequestBody defines body for LoginUser for application/json ContentType.
+type LoginUserJSONRequestBody LoginUserJSONBody
 
 // RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
 type RegisterUserJSONRequestBody RegisterUserJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Login user
+	// (POST /users/login)
+	LoginUser(w http.ResponseWriter, r *http.Request)
 	// Information about current user
 	// (GET /users/me)
-	GetUsersMe(w http.ResponseWriter, r *http.Request)
+	UserMe(w http.ResponseWriter, r *http.Request)
 	// Register user
 	// (POST /users/register)
 	RegisterUser(w http.ResponseWriter, r *http.Request)
@@ -83,12 +121,29 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// GetUsersMe operation middleware
-func (siw *ServerInterfaceWrapper) GetUsersMe(w http.ResponseWriter, r *http.Request) {
+// LoginUser operation middleware
+func (siw *ServerInterfaceWrapper) LoginUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUsersMe(w, r)
+		siw.Handler.LoginUser(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// UserMe operation middleware
+func (siw *ServerInterfaceWrapper) UserMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, JWTAuthScopes, []string{})
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UserMe(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -227,7 +282,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
+		r.Post(options.BaseURL+"/users/login", wrapper.LoginUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/me", wrapper.UserMe)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/users/register", wrapper.RegisterUser)

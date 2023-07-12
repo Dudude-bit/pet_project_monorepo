@@ -5,6 +5,7 @@ import "context"
 type UserStorageInterface interface {
 	CreateUser(ctx context.Context, dto *CreateUserDTO) (*CreateUserReturn, error)
 	GetUser(ctx context.Context, dto *GetUserDTO) (*GetUserReturn, error)
+	GetUserByUsername(ctx context.Context, dto *GetUserByUsernameDTO) (*GetUserByUsernameReturn, error)
 }
 
 type VideoStorageInterface interface {
@@ -18,6 +19,6 @@ type DonationStorageInterface interface {
 }
 
 type StorageInterface interface {
-	Pint(ctx context.Context) error
+	Ping(ctx context.Context) error
 	Close(ctx context.Context) error
 }
