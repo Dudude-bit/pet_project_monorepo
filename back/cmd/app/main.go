@@ -6,10 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/api"
-	searchService "github.com/Dudude-bit/pet_project_monorepo/back/internal/services/search"
 	userService "github.com/Dudude-bit/pet_project_monorepo/back/internal/services/user"
 	edgedbStorage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/edgedb"
-	searchStorage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/search/meilisearch"
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/utils"
 )
 
@@ -30,20 +28,14 @@ func main() {
 		logrus.WithError(newStorageErr).Fatal("cant create storage")
 	}
 
-	searchInstance, newSearchInstanceErr := searchStorage.NewStorage(ctx, cfg.SearchStorage)
-	if newSearchInstanceErr != nil {
-		logrus.WithError(newSearchInstanceErr).Fatal("cant create search instance")
-	}
-
 	userServiceInstance := userService.NewService(storageInstance, cfg.JWTSecretKey, nil)
-	searchServiceInstance := searchService.NewService(searchInstance)
 
 	server := api.NewServer(&api.ServerParams{
-		BaseURL:       cfg.BaseURL,
-		WriteTimeout:  cfg.WriteTimeout,
-		ReadTimeout:   cfg.ReadTimeout,
-		UserService:   userServiceInstance,
-		SearchService: searchServiceInstance,
+		BaseURL:      cfg.BaseURL,
+		WriteTimeout: cfg.WriteTimeout,
+		ReadTimeout:  cfg.ReadTimeout,
+		JWTSecretKey: cfg.JWTSecretKey,
+		UserService:  userServiceInstance,
 	})
 
 	logrus.Info("starting server")

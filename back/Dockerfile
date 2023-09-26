@@ -28,4 +28,6 @@ WORKDIR /app
 
 COPY --from=builder /build/main ./
 
+ADD api/config.yaml .
+
 CMD ["./main"]

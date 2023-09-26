@@ -7,8 +7,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	storage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/edgedb"
-	queue "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/queue/rabbitmq"
-	search "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/search/meilisearch"
 )
 
 type Config struct {
@@ -18,8 +16,6 @@ type Config struct {
 	WriteTimeout  time.Duration   `yaml:"write_timeout"`
 	JWTSecretKey  string          `yaml:"jwt_secret_key"`
 	Storage       *storage.Config `yaml:"db"`
-	QueueStorage  *queue.Config   `yaml:"queue"`
-	SearchStorage *search.Config  `yaml:"search"`
 } // TODO move this structure
 
 func LoadConfig(configPath string) (*Config, error) {
