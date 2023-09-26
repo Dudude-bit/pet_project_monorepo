@@ -12,14 +12,14 @@ import (
 )
 
 type Config struct {
-	BaseURL           string          `yaml:"base_url"`
-	ServerAddress     string          `yaml:"server_address"`
-	ReadHeaderTimeout time.Duration   `yaml:"read_header_timeout"`
-	ReadTimeout       time.Duration   `yaml:"read_timeout"`
-	JWTSecretKey      string          `yaml:"jwt_secret_key"`
-	Storage           *storage.Config `yaml:"db"`
-	QueueStorage      *queue.Config   `yaml:"queue"`
-	SearchStorage     *search.Config  `yaml:"search"`
+	BaseURL       string          `yaml:"base_url"`
+	ServerAddress string          `yaml:"server_address"`
+	ReadTimeout   time.Duration   `yaml:"read_timeout"`
+	WriteTimeout  time.Duration   `yaml:"write_timeout"`
+	JWTSecretKey  string          `yaml:"jwt_secret_key"`
+	Storage       *storage.Config `yaml:"db"`
+	QueueStorage  *queue.Config   `yaml:"queue"`
+	SearchStorage *search.Config  `yaml:"search"`
 } // TODO move this structure
 
 func LoadConfig(configPath string) (*Config, error) {

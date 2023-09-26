@@ -4,19 +4,6 @@ services:
       dockerfile: ./Dockerfile
       context: ./
     env_file: "./.env"
-  queue:
-    image: "rabbitmq"
-    environment:
-      RABBITMQ_DEFAULT_USER: "admin"
-      RABBITMQ_DEFAULT_PASS: "admin"
-    volumes:
-      - "queue_data:/var/lib/rabbitmq/mnesia/"
-  search:
-    image: "getmeili/meilisearch"
-    environment:
-      MASTER_KEY: "admin"
-    volumes:
-      - "meili_data:/meili_data"
   database:
     image: "edgedb/edgedb"
     environment:

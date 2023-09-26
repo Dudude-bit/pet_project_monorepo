@@ -1,118 +1,65 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-
+	"context"
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/services/user"
 )
 
-func (ae *Server) RegisterUser(response http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
+func (ae *Server) RegisterUser(ctx context.Context, request RegisterUserRequestObject) (RegisterUserResponseObject, error) {
 
-	b, readErr := io.ReadAll(request.Body)
-	defer request.Body.Close()
-
-	if readErr != nil {
-		sendErrorResponse(response, http.StatusBadRequest, readErr)
-		return
-	}
-
-	var data RegisterUserJSONRequestBody
-	unmarshalErr := json.Unmarshal(b, &data)
-	if unmarshalErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, readErr)
-		return
-	}
-
-	if validationErr := data.Validate(ctx); validationErr != nil {
-		sendErrorResponse(response, http.StatusBadRequest, validationErr)
-		return
-	}
+	// TODO add validation
 
 	registeredUser, registerUserErr := ae.UserService.RegisterUser(ctx, &user.RegisterUserDTO{
-		Username: data.Username,
-		Email:    data.Email,
-		Password: data.Password,
+		Username: request.Body.Username,
+		Email:    request.Body.Email,
+		Password: request.Body.Password,
 	})
 
 	if registerUserErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, registerUserErr)
-		return
+		return nil, registerUserErr
 	}
 
-	if sendErr := sendSuccessResponse(response, http.StatusCreated, User{
-		Email:    registeredUser.Email,
-		Username: registeredUser.Username,
-	}); sendErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, sendErr)
-		return
-	}
+	return RegisterUser200JSONResponse{
+		Data: &User{
+			Email:    registeredUser.Email,
+			Username: registeredUser.Username,
+		},
+	}, registerUserErr
 }
 
-func (ae *Server) LoginUser(response http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
+func (ae *Server) LoginUser(ctx context.Context, request LoginUserRequestObject) (LoginUserResponseObject, error) {
 
-	b, readErr := io.ReadAll(request.Body)
-	defer request.Body.Close()
-
-	if readErr != nil {
-		sendErrorResponse(response, http.StatusBadRequest, readErr)
-		return
-	}
-
-	var data LoginUserJSONRequestBody
-	unmarshalErr := json.Unmarshal(b, &data)
-	if unmarshalErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, unmarshalErr)
-		return
-	}
-
-	if validationErr := data.Validate(ctx); validationErr != nil {
-		sendErrorResponse(response, http.StatusBadRequest, validationErr)
-		return
-	}
+	// TODO add validation
 
 	loginData, loginUserErr := ae.UserService.LoginUser(ctx, &user.LoginUserDTO{
-		Username: data.Username,
-		Password: data.Password,
+		Username: request.Body.Username,
+		Password: request.Body.Password,
 	})
 
 	if loginUserErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, loginUserErr)
-		return
+		return nil, loginUserErr
 	}
 
-	if sendErr := sendSuccessResponse(response, http.StatusCreated, Authorization{
-		AccessToken: loginData.AccessToken,
-	}); sendErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, sendErr)
-		return
-	}
+	return LoginUser200JSONResponse{
+		Data: &Authorization{
+			AccessToken: loginData.AccessToken,
+		},
+	}, nil
 }
 
-func (ae *Server) UserMe(response http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
+func (ae *Server) UserMe(ctx context.Context, _ UserMeRequestObject) (UserMeResponseObject, error) {
 
-	userId, ok := request.Context().Value(userIdKey).(string)
-	if !ok {
-		sendErrorResponse(response, http.StatusInternalServerError, fmt.Errorf("something went wrong"))
-		return
-	}
+	userId := ctx.Value(JWTUserContextKey).(string)
 
-	user, getUserErr := ae.UserService.GetUser(ctx, &user.GetUserDTO{Id: userId})
+	userResult, getUserErr := ae.UserService.GetUser(ctx, &user.GetUserDTO{Id: userId})
 	if getUserErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, getUserErr)
-		return
+		return nil, getUserErr
 	}
 
-	if sendErr := sendSuccessResponse(response, http.StatusCreated, User{
-		Username: user.Username,
-		Email:    user.Email,
-	}); sendErr != nil {
-		sendErrorResponse(response, http.StatusInternalServerError, sendErr)
-		return
-	}
+	return UserMe200JSONResponse{
+		Data: &User{
+			Email:    userResult.Email,
+			Username: userResult.Username,
+		},
+	}, nil
 }

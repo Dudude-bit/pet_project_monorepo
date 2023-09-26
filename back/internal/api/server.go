@@ -1,14 +1,12 @@
 package api
 
 import (
-	"net/http"
 	"time"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 
 	searchService "github.com/Dudude-bit/pet_project_monorepo/back/internal/services/search"
 	userService "github.com/Dudude-bit/pet_project_monorepo/back/internal/services/user"
+	jwtware "github.com/gofiber/contrib/jwt"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Server struct {
@@ -17,34 +15,56 @@ type Server struct {
 }
 
 type ServerParams struct {
-	BaseURL           string                         `json:"base_url"`
-	ServerAddress     string                         `json:"server_address"`
-	JWTSecretKey      string                         `json:"jwt_secret_key"`
-	ReadHeaderTimeout time.Duration                  `json:"read_header_timeout"`
-	ReadTimeout       time.Duration                  `json:"read_timeout"`
-	UserService       userService.ServiceInterface   `json:"user_service"`
-	SearchService     searchService.ServiceInterface `json:"search_service"`
+	BaseURL       string                         `json:"base_url"`
+	ReadTimeout   time.Duration                  `json:"read_timeout"`
+	WriteTimeout  time.Duration                  `json:"write_timeout"`
+	UserService   userService.ServiceInterface   `json:"user_service"`
+	SearchService searchService.ServiceInterface `json:"search_service"`
 }
 
-func NewServer(params *ServerParams) (*http.Server, error) {
-	mux := chi.NewRouter()
-
-	serverEnv := &Server{
+func NewServer(params *ServerParams) *fiber.App {
+	server := Server{
 		UserService: params.UserService,
 		Search:      params.SearchService,
 	}
-	mux.With(middleware.SetHeader("Content-Type", "text/json")).
-		Route(params.BaseURL, func(r chi.Router) {
-			HandlerWithOptions(serverEnv, ChiServerOptions{
-				BaseRouter:  r,
-				Middlewares: []MiddlewareFunc{WithUserMiddleware(params.JWTSecretKey)},
-			})
-		})
 
-	return &http.Server{
-		Addr:              params.ServerAddress,
-		Handler:           mux,
-		ReadHeaderTimeout: params.ReadHeaderTimeout,
-		ReadTimeout:       params.ReadTimeout,
-	}, nil
+	jwtMiddleware := jwtware.New(jwtware.Config{
+		Filter: func(ctx *fiber.Ctx) bool {
+			return ctx.Context().UserValue(JWTUserContextKey) == nil
+		},
+		SuccessHandler: nil,
+		ErrorHandler:   nil,
+		SigningKey:     jwtware.SigningKey{},
+		SigningKeys:    nil,
+		ContextKey:     JWTUserContextKey,
+		Claims:         nil,
+		TokenLookup:    "",
+		AuthScheme:     "",
+		KeyFunc:        nil,
+		JWKSetURLs:     nil,
+	})
+
+	app := fiber.New(fiber.Config{
+		StrictRouting: true,
+		CaseSensitive: false,
+		ReadTimeout:   params.ReadTimeout,
+		WriteTimeout:  params.WriteTimeout,
+		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+			// todo add custom response code
+
+			return ctx.JSON(struct {
+				Error string `json:"error"`
+			}{
+				Error: err.Error(),
+			})
+		},
+		DisableStartupMessage: true,
+	})
+
+	ssi := NewStrictHandler(&server, nil)
+	RegisterHandlersWithOptions(app, ssi, FiberServerOptions{
+		BaseURL:     params.BaseURL,
+		Middlewares: []MiddlewareFunc{jwtMiddleware},
+	})
+	return app
 }
