@@ -1,0 +1,5 @@
+DEFINE TABLE users SCHEMAFULL;
+
+DEFINE FIELD username ON TABLE users TYPE string UNIQUE;
+DEFINE FIELD email ON TABLE users TYPE string UNIQUE;
+DEFINE FIELD password ON TABLE users TYPE string;
