@@ -7,18 +7,16 @@ import (
 	"time"
 
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database"
-	"github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/queue"
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/utils"
 )
 
 type Service struct {
 	storage      database.UserStorageInterface
 	JWTSecretKey string
-	queue        queue.UserStorageInterface
 }
 
-func NewService(storageInstance database.UserStorageInterface, JWTSecretKey string, queueInstance queue.UserStorageInterface) *Service {
-	return &Service{storage: storageInstance, JWTSecretKey: JWTSecretKey, queue: queueInstance}
+func NewService(storageInstance database.UserStorageInterface, JWTSecretKey string) *Service {
+	return &Service{storage: storageInstance, JWTSecretKey: JWTSecretKey}
 }
 
 func (s *Service) RegisterUser(ctx context.Context, dto *RegisterUserDTO) (*RegisterUserReturn, error) {
@@ -27,7 +25,7 @@ func (s *Service) RegisterUser(ctx context.Context, dto *RegisterUserDTO) (*Regi
 		return nil, hashPasswordErr
 	}
 
-	user, createUserErr := s.storage.CreateUser(ctx, &database.CreateUserDTO{
+	user, createUserErr := s.storage.CreateUser(ctx, &database.User{
 		Username: dto.Username,
 		Email:    dto.Email,
 		Password: hashedPassword,
@@ -43,7 +41,7 @@ func (s *Service) RegisterUser(ctx context.Context, dto *RegisterUserDTO) (*Regi
 }
 
 func (s *Service) LoginUser(ctx context.Context, dto *LoginUserDTO) (*LoginUserReturn, error) {
-	user, getUserByUsernameErr := s.storage.GetUserByUsername(ctx, &database.GetUserByUsernameDTO{Username: dto.Username})
+	user, getUserByUsernameErr := s.storage.GetUserByUsername(ctx, dto.Username)
 
 	if getUserByUsernameErr != nil {
 		return nil, getUserByUsernameErr
@@ -69,7 +67,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *LoginUserDTO) (*LoginUserR
 }
 
 func (s *Service) GetUser(ctx context.Context, dto *GetUserDTO) (*GetUserReturn, error) {
-	user, getUserErr := s.storage.GetUser(ctx, &database.GetUserDTO{Id: dto.Id})
+	user, getUserErr := s.storage.GetUser(ctx, dto.Id)
 	if getUserErr != nil {
 		return nil, getUserErr
 	}

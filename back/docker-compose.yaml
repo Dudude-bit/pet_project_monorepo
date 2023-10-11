@@ -6,20 +6,28 @@ services:
     networks:
       - main
     ports:
-      - 8000:8000
+      - 8001:8001
+    depends_on:
+      - database
   database:
-    image: "edgedb/edgedb"
+    image: "surrealdb/surrealdb"
+    env_file:
+      - surrealdb.env
     networks:
       - main
     ports:
-      - 5656:5656
-    environment:
-      EDGEDB_SERVER_SECURITY: "insecure_dev_mode"
+      - 8000:8000
     volumes:
-      - "edgedb_data:/var/lib/edgedb/data"
-      - "./internal/storage/database/edgedb/dbschema:/dbschema"
-volumes:
-  edgedb_data:
+      - ./surrealdb-data:/surrealdb-data
+    entrypoint:
+      - /surreal
+      - start
+      - --auth
+      - --query-timeout
+      - 30m
+      - --transaction-timeout
+      - 1h
+      - file:/surrealdb-data
 networks:
   main:
     driver: bridge

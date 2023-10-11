@@ -28,6 +28,7 @@ WORKDIR /app
 
 COPY --from=builder /build/main ./
 
-ADD api/config.yaml .
+ADD cmd/app/config-docker-compose.yaml .
+
 
 CMD ["./main"]

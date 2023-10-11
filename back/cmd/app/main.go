@@ -7,14 +7,14 @@ import (
 
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/api"
 	userService "github.com/Dudude-bit/pet_project_monorepo/back/internal/services/user"
-	edgedbStorage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/edgedb"
+	edgedbStorage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/surrealdb"
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/utils"
 )
 
 func main() {
-	ctx := context.Background()
+	_ = context.Background()
 
-	configPath := flag.String("c", "./config.yaml", "Path to config")
+	configPath := flag.String("c", "./config-docker-compose.yaml", "Path to config")
 	flag.Parse()
 
 	cfg, loadCfgErr := utils.LoadConfig(*configPath)
@@ -23,12 +23,12 @@ func main() {
 	}
 	utils.ConfigureLogger()
 
-	storageInstance, newStorageErr := edgedbStorage.NewStorage(ctx, cfg.Storage)
+	storageInstance, newStorageErr := edgedbStorage.NewStorage(cfg.Storage)
 	if newStorageErr != nil {
 		logrus.WithError(newStorageErr).Fatal("cant create storage")
 	}
 
-	userServiceInstance := userService.NewService(storageInstance, cfg.JWTSecretKey, nil)
+	userServiceInstance := userService.NewService(storageInstance, cfg.JWTSecretKey)
 
 	server := api.NewServer(&api.ServerParams{
 		BaseURL:      cfg.BaseURL,

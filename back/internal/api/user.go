@@ -48,7 +48,6 @@ func (ae *Server) LoginUser(ctx context.Context, request LoginUserRequestObject)
 }
 
 func (ae *Server) UserMe(ctx context.Context, _ UserMeRequestObject) (UserMeResponseObject, error) {
-
 	userId := ctx.Value(JWTUserContextKey).(string)
 
 	userResult, getUserErr := ae.UserService.GetUser(ctx, &user.GetUserDTO{Id: userId})

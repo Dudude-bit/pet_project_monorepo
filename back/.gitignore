@@ -1,0 +1,7 @@
+.idea/
+.env
+cmd/app/config-docker-compose.yaml
+cmd/app/config-localhost.yaml
+internal/storage/database/surrealdb/.surrealdb
+surrealdb.env
+surrealdb-data/

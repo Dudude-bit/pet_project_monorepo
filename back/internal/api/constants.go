@@ -1,5 +1,6 @@
 package api
 
 const (
-	JWTUserContextKey = "jwtUser"
+	JWTUserContextKey   = "jwtUser"
+	RequestIdContextKey = "requestid"
 )

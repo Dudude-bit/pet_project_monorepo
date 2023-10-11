@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	storage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/edgedb"
+	storage "github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database/surrealdb"
 )
 
 type Config struct {

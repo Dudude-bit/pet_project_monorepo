@@ -2,16 +2,11 @@ package surrealdb
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"time"
 
 	"github.com/surrealdb/surrealdb.go"
 
 	"github.com/Dudude-bit/pet_project_monorepo/back/internal/storage/database"
-)
-
-const (
-	thing = "user"
 )
 
 type Config struct {
@@ -52,11 +47,17 @@ func (s *Storage) Close() {
 }
 
 func (s *Storage) CreateUser(_ context.Context, dto *database.User) (*database.User, error) {
-	users, createErr := surrealdb.SmartUnmarshal[[]*database.User](s.conn.Create(thing, &database.User{
-		Id:       uuid.New().String(),
-		Username: dto.Username,
-		Email:    dto.Email,
-		Password: dto.Password,
+	query := `
+	INSERT INTO users {
+	    'username': $username,
+	    'email': $email,
+	    'password': $password
+	}
+	`
+	users, createErr := surrealdb.SmartUnmarshal[[]*database.User](s.conn.Query(query, map[string]string{
+		"username": dto.Username,
+		"email":    dto.Email,
+		"password": dto.Password,
 	}))
 	if createErr != nil {
 		return nil, createErr
@@ -66,11 +67,10 @@ func (s *Storage) CreateUser(_ context.Context, dto *database.User) (*database.U
 
 func (s *Storage) GetUser(_ context.Context, id string) (*database.User, error) {
 	query := `
-	SELECT username, mail, password from $thing WHERE id = $id
+	SELECT username, email, password from type::thing("users", $id)
 	`
 	users, queryErr := surrealdb.SmartUnmarshal[[]*database.User](s.conn.Query(query, map[string]string{
-		"thing": thing,
-		"id":    id,
+		"id": id,
 	}))
 	if queryErr != nil {
 		return nil, queryErr
@@ -80,10 +80,9 @@ func (s *Storage) GetUser(_ context.Context, id string) (*database.User, error) 
 
 func (s *Storage) GetUserByUsername(_ context.Context, username string) (*database.User, error) {
 	query := `
-	SELECT username, mail, password from $thing
+	SELECT meta::id(id) AS id, username, mail, password from users where username = $username
 	`
 	users, queryErr := surrealdb.SmartUnmarshal[[]*database.User](s.conn.Query(query, map[string]string{
-		"thing":    thing,
 		"username": username,
 	}))
 	if queryErr != nil {
